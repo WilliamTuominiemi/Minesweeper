@@ -20,6 +20,8 @@ const int numOfMines = 10;
 vector<pair<int, int>> mines;
 vector<pair<int, int>> explored;
 
+bool gameOver = false;
+
 void clearBackground()
 {
     SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
@@ -210,6 +212,22 @@ void drawExlored()
     }
 }
 
+void explore(pair<int, int> coord)
+{
+    for (auto &mine : mines)
+    {
+        if (mine == coord)
+        {
+            gameOver = true;
+        }
+    }
+
+    if (!gameOver)
+    {
+        explored.push_back(coord);
+    }
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -240,16 +258,17 @@ int main(int argc, char *args[])
                 case SDL_MOUSEBUTTONDOWN:
                     SDL_MouseButtonEvent mouseEvent = e.button;
 
-                    if (mouseEvent.button == SDL_BUTTON_LEFT)
+                    if (mouseEvent.button == SDL_BUTTON_LEFT && !gameOver)
                     {
-                        explored.push_back(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
+                        explore(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
                     }
                 }
             }
 
             drawGrid();
-            drawMines();
             drawExlored();
+            if (gameOver)
+                drawMines();
         }
     }
 
