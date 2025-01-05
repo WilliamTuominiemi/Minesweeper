@@ -7,8 +7,8 @@ SDL_Window *window = NULL;
 SDL_Surface *windowSurface = NULL;
 SDL_Surface *background = NULL;
 
-int SCREEN_WIDTH = 400;
-int SCREEN_HEIGHT = 400;
+int SCREEN_WIDTH = 800;
+int SCREEN_HEIGHT = 800;
 
 bool init()
 {
@@ -42,6 +42,17 @@ bool loadMedia()
     return true;
 }
 
+void close()
+{
+    SDL_FreeSurface(background);
+    background = NULL;
+
+    SDL_DestroyWindow(window);
+    window = NULL;
+
+    SDL_Quit();
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -59,7 +70,22 @@ int main(int argc, char *args[])
         else
         {
             cout << "Media loaded. " << endl;
+            SDL_BlitSurface(background, NULL, windowSurface, NULL);
+            SDL_UpdateWindowSurface(window);
+            SDL_Event e;
+            bool quit = false;
+            while (quit == false)
+            {
+                while (SDL_PollEvent(&e))
+                {
+                    if (e.type == SDL_QUIT)
+                        quit = true;
+                }
+            }
         }
     }
+
+    close();
+
     return 0;
 }
