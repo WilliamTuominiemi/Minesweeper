@@ -113,6 +113,53 @@ void drawMines()
     }
 }
 
+vector<pair<int, int>> getNeighbours(pair<int, int> coord)
+{
+    vector<pair<int, int>> neighbours;
+    vector<pair<int, int>> offsets = {
+        {-1, -1},
+        {0, -1},
+        {1, -1},
+        {-1, 0},
+        {1, 0},
+        {-1, 1},
+        {0, 1},
+        {1, 1}};
+
+    for (auto &offset : offsets)
+    {
+        int nX = coord.first + offset.first;
+        int nY = coord.second + offset.second;
+
+        if (nX >= 0 && nX < numOfSquares && nY >= 0 && nY < numOfSquares)
+        {
+            neighbours.push_back(make_pair(nX, nY));
+        }
+    }
+
+    return neighbours;
+}
+
+int neighbouringMines(pair<int, int> coord)
+{
+    vector<pair<int, int>> neighbours = getNeighbours(coord);
+
+    int mineCount = 0;
+
+    for (auto &neighbour : neighbours)
+    {
+        for (auto &mine : mines)
+        {
+            if (neighbour == mine)
+            {
+                mineCount++;
+            }
+        }
+    }
+
+    return mineCount;
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
