@@ -26,13 +26,13 @@ bool init()
         return false;
     }
 
-    window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Minesweeper", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL)
     {
         return false;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL)
     {
         return false;
@@ -56,11 +56,14 @@ void close()
     SDL_Quit();
 }
 
-void drawGrid()
+void clearBackground()
 {
     SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
     SDL_RenderClear(renderer);
+}
 
+void drawGrid()
+{
     SDL_SetRenderDrawColor(renderer, 56, 56, 56, 255);
 
     for (int x = 0; x < SCREEN_WIDTH / spacing; x++)
@@ -80,10 +83,10 @@ void generateMinePositions()
 {
     int placedMines = 0;
 
-    while (placedMines <= numOfMines)
+    while (placedMines < numOfMines)
     {
-        int x = rand() % SCREEN_WIDTH / spacing;
-        int y = rand() % SCREEN_HEIGHT / spacing;
+        int x = rand() % numOfSquares;
+        int y = rand() % numOfSquares;
         pair<int, int> coord = make_pair(x, y);
 
         int cnt = count(mines.begin(), mines.end(), coord);
@@ -94,10 +97,20 @@ void generateMinePositions()
             mines.push_back(coord);
         }
     }
+}
 
-    for (auto i : mines)
-        cout << i.first << " " << i.second
-             << endl;
+void drawMines()
+{
+    for (auto &mine : mines)
+    {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_Rect rect = {
+            mine.first * spacing + spacing / 4,
+            mine.second * spacing + spacing / 4,
+            spacing / 2,
+            spacing / 2};
+        SDL_RenderFillRect(renderer, &rect);
+    }
 }
 
 int main(int argc, char *args[])
@@ -117,6 +130,8 @@ int main(int argc, char *args[])
 
         generateMinePositions();
 
+        clearBackground();
+
         while (!quit)
         {
             while (SDL_PollEvent(&e))
@@ -126,6 +141,7 @@ int main(int argc, char *args[])
             }
 
             drawGrid();
+            drawMines();
         }
     }
 
