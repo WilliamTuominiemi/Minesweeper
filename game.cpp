@@ -18,6 +18,13 @@ const int spacing = SCREEN_WIDTH / numOfSquares;
 const int numOfMines = 10;
 
 vector<pair<int, int>> mines;
+vector<pair<int, int>> explored;
+
+void clearBackground()
+{
+    SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
+    SDL_RenderClear(renderer);
+}
 
 bool init()
 {
@@ -38,8 +45,8 @@ bool init()
         return false;
     }
 
-    SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
-    SDL_RenderClear(renderer);
+    clearBackground();
+
     SDL_RenderPresent(renderer);
 
     return true;
@@ -56,15 +63,9 @@ void close()
     SDL_Quit();
 }
 
-void clearBackground()
-{
-    SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
-    SDL_RenderClear(renderer);
-}
-
 void drawGrid()
 {
-    SDL_SetRenderDrawColor(renderer, 56, 56, 56, 255);
+    SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
 
     for (int x = 0; x < SCREEN_WIDTH / spacing; x++)
     {
@@ -103,7 +104,7 @@ void drawMines()
 {
     for (auto &mine : mines)
     {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 37, 37, 37, 255);
         SDL_Rect rect = {
             mine.first * spacing + spacing / 4,
             mine.second * spacing + spacing / 4,
@@ -160,6 +161,55 @@ int neighbouringMines(pair<int, int> coord)
     return mineCount;
 }
 
+void drawExlored()
+{
+    for (auto &square : explored)
+    {
+        int nearbyMines = neighbouringMines(square);
+
+        switch (nearbyMines)
+        {
+        case 0:
+            SDL_SetRenderDrawColor(renderer, 137, 148, 153, 255);
+            break;
+        case 1:
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            break;
+        case 2:
+            SDL_SetRenderDrawColor(renderer, 0, 128, 0, 255);
+            break;
+        case 3:
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            break;
+        case 4:
+            SDL_SetRenderDrawColor(renderer, 0, 0, 128, 255);
+            break;
+        case 5:
+            SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
+            break;
+        case 6:
+            SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
+            break;
+        case 7:
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            break;
+        case 8:
+            SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+            break;
+        default:
+            SDL_SetRenderDrawColor(renderer, 120, 6, 6, 255);
+            break;
+        }
+
+        SDL_Rect rect = {
+            square.first * spacing,
+            square.second * spacing,
+            spacing,
+            spacing};
+        SDL_RenderFillRect(renderer, &rect);
+    }
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -190,12 +240,16 @@ int main(int argc, char *args[])
                 case SDL_MOUSEBUTTONDOWN:
                     SDL_MouseButtonEvent mouseEvent = e.button;
 
-                    cout << mouseEvent.x / spacing << " " << mouseEvent.y / spacing << endl;
+                    if (mouseEvent.button == SDL_BUTTON_LEFT)
+                    {
+                        explored.push_back(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
+                    }
                 }
             }
 
             drawGrid();
             drawMines();
+            drawExlored();
         }
     }
 
