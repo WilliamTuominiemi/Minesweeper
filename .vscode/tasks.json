@@ -10,7 +10,8 @@
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
-                "-lSDL2"
+                "-lSDL2",
+                "-lSDL2_ttf"
             ],
             "options": {
                 "cwd": "${fileDirname}"

@@ -3,8 +3,11 @@
 #include <vector>
 #include <cstdlib>
 #include <bits/stdc++.h>
+#include <SDL2/SDL_ttf.h>
+#include <string>
 
 using namespace std;
+TTF_Font *font = NULL;
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
@@ -31,6 +34,11 @@ void clearBackground()
 bool init()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        return false;
+    }
+
+    if (TTF_Init() == -1)
     {
         return false;
     }
@@ -163,52 +171,84 @@ int neighbouringMines(pair<int, int> coord)
     return mineCount;
 }
 
-void drawExlored()
+void drawExplored()
 {
+    TTF_Font *font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50);
+    if (font == NULL)
+    {
+        std::cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << std::endl;
+    }
+
     for (auto &square : explored)
     {
         int nearbyMines = neighbouringMines(square);
+        SDL_Color textColor;
 
-        switch (nearbyMines)
-        {
-        case 0:
-            SDL_SetRenderDrawColor(renderer, 137, 148, 153, 255);
-            break;
-        case 1:
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-            break;
-        case 2:
-            SDL_SetRenderDrawColor(renderer, 0, 128, 0, 255);
-            break;
-        case 3:
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-            break;
-        case 4:
-            SDL_SetRenderDrawColor(renderer, 0, 0, 128, 255);
-            break;
-        case 5:
-            SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
-            break;
-        case 6:
-            SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
-            break;
-        case 7:
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            break;
-        case 8:
-            SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
-            break;
-        default:
-            SDL_SetRenderDrawColor(renderer, 120, 6, 6, 255);
-            break;
-        }
-
+        SDL_SetRenderDrawColor(renderer, 137, 148, 153, 255);
         SDL_Rect rect = {
             square.first * spacing,
             square.second * spacing,
             spacing,
             spacing};
         SDL_RenderFillRect(renderer, &rect);
+
+        if (nearbyMines == 0)
+            continue;
+
+        switch (nearbyMines)
+        {
+        case 1:
+            textColor = {0, 0, 255, 255};
+            break;
+        case 2:
+            textColor = {0, 128, 0, 255};
+            break;
+        case 3:
+            textColor = {255, 0, 0, 255};
+            break;
+        case 4:
+            textColor = {0, 0, 128, 255};
+            break;
+        case 5:
+            textColor = {128, 0, 0, 255};
+            break;
+        case 6:
+            textColor = {0, 128, 128, 255};
+            break;
+        case 7:
+            textColor = {0, 0, 0, 255};
+            break;
+        case 8:
+            textColor = {128, 128, 128, 255};
+            break;
+        default:
+            textColor = {120, 6, 6, 255};
+            break;
+        }
+
+        std::string text = std::to_string(nearbyMines);
+
+        SDL_Surface *surface = TTF_RenderText_Blended(font, text.c_str(), textColor);
+        if (surface == NULL)
+        {
+            std::cout << "Failed to render text: " << TTF_GetError() << std::endl;
+            continue;
+        }
+
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+
+        int textW = surface->w;
+        int textH = surface->h;
+        SDL_Rect textRect = {
+            square.first * spacing + (spacing - textW) / 2,
+            square.second * spacing + (spacing - textH) / 2,
+            textW,
+            textH};
+
+        SDL_RenderCopy(renderer, texture, NULL, &textRect);
+
+        SDL_DestroyTexture(texture);
     }
 }
 
@@ -266,7 +306,7 @@ int main(int argc, char *args[])
             }
 
             drawGrid();
-            drawExlored();
+            drawExplored();
             if (gameOver)
                 drawMines();
         }
