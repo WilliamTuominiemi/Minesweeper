@@ -136,8 +136,15 @@ int main(int argc, char *args[])
         {
             while (SDL_PollEvent(&e))
             {
-                if (e.type == SDL_QUIT)
+                switch (e.type)
+                {
+                case SDL_QUIT:
                     quit = true;
+                case SDL_MOUSEBUTTONDOWN:
+                    SDL_MouseButtonEvent mouseEvent = e.button;
+
+                    cout << mouseEvent.x / spacing << " " << mouseEvent.y / spacing << endl;
+                }
             }
 
             drawGrid();
