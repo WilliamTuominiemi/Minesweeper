@@ -5,6 +5,7 @@ using namespace std;
 
 SDL_Window *window = NULL;
 SDL_Surface *windowSurface = NULL;
+SDL_Surface *background = NULL;
 
 int SCREEN_WIDTH = 400;
 int SCREEN_HEIGHT = 400;
@@ -31,6 +32,16 @@ bool init()
     return true;
 }
 
+bool loadMedia()
+{
+    background = SDL_LoadBMP("background.bmp");
+    if (background == NULL)
+    {
+        return false;
+    }
+    return true;
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -40,6 +51,15 @@ int main(int argc, char *args[])
     else
     {
         cout << "Initialized. " << endl;
+
+        if (!loadMedia())
+        {
+            cout << "Failed to load media. " << endl;
+        }
+        else
+        {
+            cout << "Media loaded. " << endl;
+        }
     }
     return 0;
 }
