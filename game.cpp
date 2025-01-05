@@ -4,8 +4,7 @@
 using namespace std;
 
 SDL_Window *window = NULL;
-SDL_Surface *windowSurface = NULL;
-SDL_Surface *background = NULL;
+SDL_Renderer *renderer = NULL;
 
 int SCREEN_WIDTH = 800;
 int SCREEN_HEIGHT = 800;
@@ -16,36 +15,30 @@ bool init()
     {
         return false;
     }
-    else
-    {
-        window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-        if (window == NULL)
-        {
-            return false;
-        }
-        else
-        {
-            windowSurface = SDL_GetWindowSurface(window);
-        }
-    }
 
-    return true;
-}
-
-bool loadMedia()
-{
-    background = SDL_LoadBMP("background.bmp");
-    if (background == NULL)
+    window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    if (window == NULL)
     {
         return false;
     }
+
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL)
+    {
+        return false;
+    }
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
+
     return true;
 }
 
 void close()
 {
-    SDL_FreeSurface(background);
-    background = NULL;
+    SDL_DestroyRenderer(renderer);
+    renderer = NULL;
 
     SDL_DestroyWindow(window);
     window = NULL;
@@ -63,25 +56,25 @@ int main(int argc, char *args[])
     {
         cout << "Initialized. " << endl;
 
-        if (!loadMedia())
+        SDL_Event e;
+        bool quit = false;
+
+        while (!quit)
         {
-            cout << "Failed to load media. " << endl;
-        }
-        else
-        {
-            cout << "Media loaded. " << endl;
-            SDL_BlitSurface(background, NULL, windowSurface, NULL);
-            SDL_UpdateWindowSurface(window);
-            SDL_Event e;
-            bool quit = false;
-            while (quit == false)
+            while (SDL_PollEvent(&e))
             {
-                while (SDL_PollEvent(&e))
-                {
-                    if (e.type == SDL_QUIT)
-                        quit = true;
-                }
+                if (e.type == SDL_QUIT)
+                    quit = true;
             }
+
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderClear(renderer);
+
+            SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
+            SDL_Rect rect = {50, 50, SCREEN_WIDTH - 100, SCREEN_HEIGHT - 100};
+            SDL_RenderFillRect(renderer, &rect);
+
+            SDL_RenderPresent(renderer);
         }
     }
 
