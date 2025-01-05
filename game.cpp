@@ -6,8 +6,8 @@ using namespace std;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
-int SCREEN_WIDTH = 800;
-int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 800;
 
 bool init()
 {
@@ -28,7 +28,7 @@ bool init()
         return false;
     }
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
 
@@ -44,6 +44,28 @@ void close()
     window = NULL;
 
     SDL_Quit();
+}
+
+void drawGrid()
+{
+    const int spacing = 50;
+
+    SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
+    SDL_RenderClear(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 56, 56, 56, 255);
+
+    for (int x = 0; x < SCREEN_WIDTH / spacing; x++)
+    {
+        SDL_RenderDrawLine(renderer, x * spacing, 0, x * spacing, SCREEN_HEIGHT);
+    }
+
+    for (int y = 0; y < SCREEN_HEIGHT / spacing; y++)
+    {
+        SDL_RenderDrawLine(renderer, 0, y * spacing, SCREEN_WIDTH, y * spacing);
+    }
+
+    SDL_RenderPresent(renderer);
 }
 
 int main(int argc, char *args[])
@@ -67,14 +89,7 @@ int main(int argc, char *args[])
                     quit = true;
             }
 
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-            SDL_RenderClear(renderer);
-
-            SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
-            SDL_Rect rect = {50, 50, SCREEN_WIDTH - 100, SCREEN_HEIGHT - 100};
-            SDL_RenderFillRect(renderer, &rect);
-
-            SDL_RenderPresent(renderer);
+            drawGrid();
         }
     }
 
