@@ -1,5 +1,8 @@
 #include "SDL2/SDL.h"
 #include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -7,7 +10,14 @@ SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
 const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_HEIGHT = SCREEN_WIDTH;
+
+const int numOfSquares = 8;
+const int spacing = SCREEN_WIDTH / numOfSquares;
+
+const int numOfMines = 10;
+
+vector<pair<int, int>> mines;
 
 bool init()
 {
@@ -48,8 +58,6 @@ void close()
 
 void drawGrid()
 {
-    const int spacing = 50;
-
     SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);
     SDL_RenderClear(renderer);
 
@@ -68,6 +76,30 @@ void drawGrid()
     SDL_RenderPresent(renderer);
 }
 
+void generateMinePositions()
+{
+    int placedMines = 0;
+
+    while (placedMines <= numOfMines)
+    {
+        int x = rand() % SCREEN_WIDTH / spacing;
+        int y = rand() % SCREEN_HEIGHT / spacing;
+        pair<int, int> coord = make_pair(x, y);
+
+        int cnt = count(mines.begin(), mines.end(), coord);
+
+        if (cnt == 0)
+        {
+            placedMines++;
+            mines.push_back(coord);
+        }
+    }
+
+    for (auto i : mines)
+        cout << i.first << " " << i.second
+             << endl;
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -78,8 +110,12 @@ int main(int argc, char *args[])
     {
         cout << "Initialized. " << endl;
 
+        srand(time(0));
+
         SDL_Event e;
         bool quit = false;
+
+        generateMinePositions();
 
         while (!quit)
         {
