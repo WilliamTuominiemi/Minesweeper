@@ -22,6 +22,7 @@ int numOfMines = 10;
 
 vector<pair<int, int>> mines;
 vector<pair<int, int>> explored;
+vector<pair<int, int>> flags;
 
 bool gameOver = false;
 bool gameWon = false;
@@ -70,8 +71,6 @@ bool init()
 
     clearBackground();
 
-    SDL_RenderPresent(renderer);
-
     return true;
 }
 
@@ -99,8 +98,6 @@ void drawGrid()
     {
         SDL_RenderDrawLine(renderer, 0, y * spacing, SCREEN_WIDTH, y * spacing);
     }
-
-    SDL_RenderPresent(renderer);
 }
 
 void generateMinePositions(pair<int, int> firstSquare)
@@ -127,50 +124,14 @@ void reset()
 {
     mines.clear();
     explored.clear();
+    flags.clear();
     gameOver = false;
     gameWon = false;
 
     spacing = SCREEN_WIDTH / numOfSquares;
 
     clearBackground();
-    SDL_RenderPresent(renderer);
-
-    clearBackground();
-    SDL_RenderPresent(renderer);
-
-    clearBackground();
-    SDL_RenderPresent(renderer);
-}
-
-void drawEndText()
-{
-    const char *header;
-    const char *text;
-
-    if (gameOver)
-    {
-        header = "Game over";
-        text = "You hit a mine. Click 'Ok' to try again...";
-    }
-    else
-    {
-        header = "You won";
-        text = "You found all the mines. Click 'Ok' to try again...";
-    }
-
-    SDL_RenderPresent(renderer);
-    if (SDL_ShowSimpleMessageBox(
-            SDL_MESSAGEBOX_INFORMATION,
-            header,
-            text,
-            window) < 0)
-    {
-        std::cout << "Failed to display message box! SDL Error: " << SDL_GetError() << std::endl;
-    }
-    else
-    {
-        reset();
-    }
+    drawGrid();
 }
 
 void drawMines()
@@ -375,6 +336,41 @@ void explore(pair<int, int> coord)
     }
 }
 
+void drawFlags()
+{
+    for (auto &square : flags)
+    {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_Rect rect = {
+            square.first * spacing + spacing / 4,
+            square.second * spacing + spacing / 4,
+            spacing / 2,
+            spacing / 2};
+        SDL_RenderFillRect(renderer, &rect);
+    }
+}
+
+void flag(pair<int, int> coord)
+{
+    auto it = find(flags.begin(), flags.end(), coord);
+    if (it != flags.end())
+    {
+        flags.erase(it);
+
+        SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
+        SDL_Rect rect = {
+            coord.first * spacing,
+            coord.second * spacing,
+            spacing,
+            spacing};
+        SDL_RenderFillRect(renderer, &rect);
+    }
+    else if (count(explored.begin(), explored.end(), coord) == 0)
+    {
+        flags.push_back(coord);
+    }
+}
+
 bool checkIfWon()
 {
     if ((numOfSquares * numOfSquares) - numOfMines == explored.size())
@@ -428,6 +424,43 @@ void openDifficultyMenu()
     reset();
 }
 
+void drawEndText()
+{
+    const char *header;
+    const char *text;
+
+    if (gameOver)
+    {
+        header = "Game over";
+        text = "You hit a mine. Click 'Ok' to try again...";
+    }
+    else
+    {
+        header = "You won";
+        text = "You found all the mines. Click 'Ok' to try again...";
+    }
+
+    clearBackground();
+    drawExplored();
+    drawFlags();
+    drawMines();
+    drawGrid();
+    SDL_RenderPresent(renderer);
+
+    if (SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_INFORMATION,
+            header,
+            text,
+            window) < 0)
+    {
+        std::cout << "Failed to display message box! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    else
+    {
+        reset();
+    }
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -466,8 +499,17 @@ int main(int argc, char *args[])
                             generateMinePositions(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
                         }
                         explore(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
-                        checkIfWon();
+                        if (checkIfWon())
+                        {
+                            gameWon = true;
+                        }
                     }
+
+                    if (mouseEvent.button == SDL_BUTTON_RIGHT && !gameOver && !gameWon)
+                    {
+                        flag(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
+                    }
+
                     break;
                 }
 
@@ -480,13 +522,16 @@ int main(int argc, char *args[])
                 }
             }
 
-            drawGrid();
+            clearBackground();
             drawExplored();
+            drawFlags();
             if (gameOver || gameWon)
             {
                 drawMines();
                 drawEndText();
             }
+            drawGrid();
+            SDL_RenderPresent(renderer);
         }
     }
 
