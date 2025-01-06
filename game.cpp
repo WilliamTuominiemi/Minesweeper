@@ -260,19 +260,42 @@ void drawExplored()
     }
 }
 
-void explore(pair<int, int> coord)
+bool checkIfMineInSquare(pair<int, int> coord)
 {
     for (auto &mine : mines)
     {
         if (mine == coord)
         {
-            gameOver = true;
+            return true;
         }
     }
+    return false;
+}
 
-    if (!gameOver)
+void explore(pair<int, int> coord)
+{
+    if (find(explored.begin(), explored.end(), coord) != explored.end())
     {
-        explored.push_back(coord);
+        return;
+    }
+
+    if (checkIfMineInSquare(coord))
+    {
+        gameOver = true;
+        return;
+    }
+
+    explored.push_back(coord);
+
+    if (neighbouringMines(coord) == 0)
+    {
+        vector<pair<int, int>> neighbours = getNeighbours(coord);
+
+        for (auto &neighbour : neighbours)
+        {
+
+            explore(neighbour);
+        }
     }
 }
 
