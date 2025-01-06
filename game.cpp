@@ -15,10 +15,10 @@ SDL_Renderer *renderer = NULL;
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = SCREEN_WIDTH;
 
-const int numOfSquares = 8;
-const int spacing = SCREEN_WIDTH / numOfSquares;
+int numOfSquares = 8;
+int spacing = SCREEN_WIDTH / numOfSquares;
 
-const int numOfMines = 10;
+int numOfMines = 10;
 
 vector<pair<int, int>> mines;
 vector<pair<int, int>> explored;
@@ -129,6 +129,9 @@ void reset()
     explored.clear();
     gameOver = false;
     gameWon = false;
+
+    spacing = SCREEN_WIDTH / numOfSquares;
+
     clearBackground();
     SDL_RenderPresent(renderer);
 
@@ -254,7 +257,7 @@ int neighbouringMines(pair<int, int> coord)
 
 void drawExplored()
 {
-    TTF_Font *font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50);
+    TTF_Font *font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", spacing);
     if (font == NULL)
     {
         cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << endl;
@@ -381,6 +384,50 @@ bool checkIfWon()
     return false;
 }
 
+void openDifficultyMenu()
+{
+    const SDL_MessageBoxButtonData buttons[] = {
+        {0, 0, "Easy"},
+        {0, 1, "Medium"},
+        {0, 2, "Hard"}};
+
+    const SDL_MessageBoxData messageboxdata = {
+        SDL_MESSAGEBOX_INFORMATION,
+        NULL,
+        "Select Difficulty",
+        "Choose your difficulty level:",
+        SDL_arraysize(buttons),
+        buttons,
+        NULL};
+
+    int buttonid;
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0)
+    {
+        cout << "Error displaying message box: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    switch (buttonid)
+    {
+    case 0:
+        numOfSquares = 8;
+        numOfMines = 10;
+        break;
+    case 1:
+        numOfSquares = 16;
+        numOfMines = 40;
+        break;
+    case 2:
+        numOfSquares = 25;
+        numOfMines = 60;
+        break;
+    default:
+        cout << "No selection made." << endl;
+    }
+
+    reset();
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -406,7 +453,10 @@ int main(int argc, char *args[])
                 {
                 case SDL_QUIT:
                     quit = true;
+                    break;
+
                 case SDL_MOUSEBUTTONDOWN:
+                {
                     SDL_MouseButtonEvent mouseEvent = e.button;
 
                     if (mouseEvent.button == SDL_BUTTON_LEFT && !gameOver && !gameWon)
@@ -418,6 +468,16 @@ int main(int argc, char *args[])
                         explore(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
                         checkIfWon();
                     }
+                    break;
+                }
+
+                case SDL_KEYDOWN:
+                    if (e.key.keysym.sym == SDLK_ESCAPE)
+                    {
+                        cout << "test" << endl;
+                        openDifficultyMenu();
+                    }
+                    break;
                 }
             }
 
