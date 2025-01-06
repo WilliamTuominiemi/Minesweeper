@@ -474,7 +474,6 @@ int main(int argc, char *args[])
                 case SDL_KEYDOWN:
                     if (e.key.keysym.sym == SDLK_ESCAPE)
                     {
-                        cout << "test" << endl;
                         openDifficultyMenu();
                     }
                     break;
