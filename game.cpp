@@ -32,6 +32,8 @@ void clearBackground()
 {
     SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
     SDL_RenderClear(renderer);
+    SDL_RenderSetViewport(renderer, NULL);
+    SDL_SetRenderTarget(renderer, NULL);
 }
 
 bool init()
@@ -118,6 +120,55 @@ void generateMinePositions()
             placedMines++;
             mines.push_back(coord);
         }
+    }
+}
+
+void reset()
+{
+    mines.clear();
+    explored.clear();
+    gameOver = false;
+    gameWon = false;
+    clearBackground();
+    SDL_RenderPresent(renderer);
+
+    clearBackground();
+    SDL_RenderPresent(renderer);
+
+    generateMinePositions();
+
+    clearBackground();
+    SDL_RenderPresent(renderer);
+}
+
+void drawEndText()
+{
+    const char *header;
+    const char *text;
+
+    if (gameOver)
+    {
+        header = "Game over";
+        text = "You hit a mine. Click 'Ok' to try again...";
+    }
+    else
+    {
+        header = "You won";
+        text = "You found all the mines. Click 'Ok' to try again...";
+    }
+
+    SDL_RenderPresent(renderer);
+    if (SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_INFORMATION,
+            header,
+            text,
+            window) < 0)
+    {
+        std::cout << "Failed to display message box! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    else
+    {
+        reset();
     }
 }
 
@@ -363,7 +414,7 @@ int main(int argc, char *args[])
                 case SDL_MOUSEBUTTONDOWN:
                     SDL_MouseButtonEvent mouseEvent = e.button;
 
-                    if (mouseEvent.button == SDL_BUTTON_LEFT && !gameOver)
+                    if (mouseEvent.button == SDL_BUTTON_LEFT && !gameOver && !gameWon)
                     {
                         explore(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
                         checkIfWon();
@@ -374,7 +425,10 @@ int main(int argc, char *args[])
             drawGrid();
             drawExplored();
             if (gameOver || gameWon)
+            {
                 drawMines();
+                drawEndText();
+            }
         }
     }
 
