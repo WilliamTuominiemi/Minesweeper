@@ -103,7 +103,7 @@ void drawGrid()
     SDL_RenderPresent(renderer);
 }
 
-void generateMinePositions()
+void generateMinePositions(pair<int, int> firstSquare)
 {
     int placedMines = 0;
 
@@ -115,7 +115,7 @@ void generateMinePositions()
 
         int cnt = count(mines.begin(), mines.end(), coord);
 
-        if (cnt == 0)
+        if (cnt == 0 && coord != firstSquare)
         {
             placedMines++;
             mines.push_back(coord);
@@ -134,8 +134,6 @@ void reset()
 
     clearBackground();
     SDL_RenderPresent(renderer);
-
-    generateMinePositions();
 
     clearBackground();
     SDL_RenderPresent(renderer);
@@ -369,7 +367,6 @@ void explore(pair<int, int> coord)
 
         for (auto &neighbour : neighbours)
         {
-
             explore(neighbour);
         }
     }
@@ -399,8 +396,6 @@ int main(int argc, char *args[])
         SDL_Event e;
         bool quit = false;
 
-        generateMinePositions();
-
         clearBackground();
 
         while (!quit)
@@ -416,6 +411,10 @@ int main(int argc, char *args[])
 
                     if (mouseEvent.button == SDL_BUTTON_LEFT && !gameOver && !gameWon)
                     {
+                        if (explored.empty())
+                        {
+                            generateMinePositions(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
+                        }
                         explore(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
                         checkIfWon();
                     }
