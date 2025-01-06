@@ -35,23 +35,31 @@ bool init()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
+        cerr << "Failed to initialize SDL: %s\n"
+             << SDL_GetError() << endl;
         return false;
     }
 
     if (TTF_Init() == -1)
     {
+        cerr << "Failed to initialize SDL_ttf: %s\n"
+             << TTF_GetError() << endl;
         return false;
     }
 
     window = SDL_CreateWindow("Minesweeper", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL)
     {
+        cerr << "Failed to create window: %s\n"
+             << SDL_GetError() << endl;
         return false;
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL)
     {
+        cerr << "Failed to create renderer: %s\n"
+             << SDL_GetError() << endl;
         return false;
     }
 
