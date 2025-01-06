@@ -25,6 +25,8 @@ vector<pair<int, int>> explored;
 
 bool gameOver = false;
 
+pair<int, int> mineHit;
+
 void clearBackground()
 {
     SDL_SetRenderDrawColor(renderer, 192, 192, 192, 255);
@@ -122,6 +124,17 @@ void drawMines()
 {
     for (auto &mine : mines)
     {
+        if (mineHit == mine)
+        {
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_Rect rect1 = {
+                mine.first * spacing,
+                mine.second * spacing,
+                spacing,
+                spacing};
+            SDL_RenderFillRect(renderer, &rect1);
+        }
+
         SDL_SetRenderDrawColor(renderer, 37, 37, 37, 255);
         SDL_Rect rect = {
             mine.first * spacing + spacing / 4,
@@ -281,6 +294,7 @@ void explore(pair<int, int> coord)
 
     if (checkIfMineInSquare(coord))
     {
+        mineHit = coord;
         gameOver = true;
         return;
     }
