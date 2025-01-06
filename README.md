@@ -7,7 +7,7 @@ This is a simple implementation of the classic Minesweeper game using the SDL2 l
 ## Features
 - Customizable Grid: Easily adjust grid size and spacing.
 - Dynamic Rendering: Real-time updates with SDL2 rendering.
-- Classic Minesweeper Logic: Neighbor detection and mine count visualization.
+- Classic Minesweeper Logic: Neighbor detection, mine count visualization and recursively reveals neighbours. 
 
 ## Requirements
 
