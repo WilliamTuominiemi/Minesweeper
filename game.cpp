@@ -24,6 +24,7 @@ vector<pair<int, int>> mines;
 vector<pair<int, int>> explored;
 
 bool gameOver = false;
+bool gameWon = false;
 
 pair<int, int> mineHit;
 
@@ -134,6 +135,16 @@ void drawMines()
                 spacing};
             SDL_RenderFillRect(renderer, &rect1);
         }
+        else if (gameWon)
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+            SDL_Rect rect1 = {
+                mine.first * spacing,
+                mine.second * spacing,
+                spacing,
+                spacing};
+            SDL_RenderFillRect(renderer, &rect1);
+        }
 
         SDL_SetRenderDrawColor(renderer, 37, 37, 37, 255);
         SDL_Rect rect = {
@@ -197,7 +208,7 @@ void drawExplored()
     TTF_Font *font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 50);
     if (font == NULL)
     {
-        std::cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << std::endl;
+        cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << endl;
     }
 
     for (auto &square : explored)
@@ -247,12 +258,12 @@ void drawExplored()
             break;
         }
 
-        std::string text = std::to_string(nearbyMines);
+        string text = to_string(nearbyMines);
 
         SDL_Surface *surface = TTF_RenderText_Blended(font, text.c_str(), textColor);
         if (surface == NULL)
         {
-            std::cout << "Failed to render text: " << TTF_GetError() << std::endl;
+            cout << "Failed to render text: " << TTF_GetError() << endl;
             continue;
         }
 
@@ -313,6 +324,15 @@ void explore(pair<int, int> coord)
     }
 }
 
+bool checkIfWon()
+{
+    if ((numOfSquares * numOfSquares) - numOfMines == explored.size())
+    {
+        gameWon = true;
+    }
+    return false;
+}
+
 int main(int argc, char *args[])
 {
     if (!init())
@@ -346,13 +366,14 @@ int main(int argc, char *args[])
                     if (mouseEvent.button == SDL_BUTTON_LEFT && !gameOver)
                     {
                         explore(make_pair(mouseEvent.x / spacing, mouseEvent.y / spacing));
+                        checkIfWon();
                     }
                 }
             }
 
             drawGrid();
             drawExplored();
-            if (gameOver)
+            if (gameOver || gameWon)
                 drawMines();
         }
     }
